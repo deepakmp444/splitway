@@ -1,77 +1,114 @@
 import { Image } from 'expo-image';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from "react-native-gifted-charts";
+import { useRouter } from 'expo-router';
 import { colors } from '../../util/constant';
 
+
 export default function Chat() {
+  const router = useRouter();
+
   const lentData = [
-    { value: 70, color: 'green' },
-    { value: 30, color: 'lightgray' }
+    { value: 70, color: '#38b000' },
+    { value: 30, color: '#f0f0f0' }
   ];
 
   const borrowData = [
-    { value: 50, color: 'brown' },
-    { value: 50, color: 'lightgray' }
+    { value: 50, color: '#ff0000' },
+    { value: 50, color: '#f0f0f0' }
   ];
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          style={styles.image}
-          source="https://picsum.photos/200"
-          contentFit="cover"
-          transition={1000}
-        />
-        <View>
-          <Text>Hi, Deepak</Text>
-        </View>
-        <View style={styles.notification}>
-          <Ionicons name="notifications" size={24} color="black" />
-          {true && ( // Replace 'true' with your condition
-            <View style={styles.badge} />
-          )}
-        </View>
-      </View>
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardText}>Total Spend(L+B)</Text>
-          <Text style={styles.textcolor}>$100</Text>
-        </View>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardText}>Active Group</Text>
-          <Text style={styles.textcolor}>2</Text>
-        </View>
-        <View style={styles.chart}>
-          <View style={styles.chartContainer}>
-            <PieChart
-              donut
-              innerRadius={50}
-              radius={70}
-              data={lentData}
-              centerLabelComponent={() => {
-                return <Text style={{ fontSize: 24 }}>70%</Text>;
-              }}
-            />
-            <Text style={styles.textcolor}>Lent</Text>
-          </View>
+      <View style={styles.subcontainer}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.push('/account')}>
+          <Image
+            style={styles.image}
+            source="https://picsum.photos/200"
+            contentFit="cover"
+            transition={1000}
+          />
+           {/* <Text>Hi, Deepak</Text> */}
+          </Pressable>
           <View>
-            <PieChart
-              donut
-              innerRadius={50}
-              radius={70}
-              data={borrowData}
-              centerLabelComponent={() => {
-                return <Text style={{ fontSize: 24 }}>50%</Text>;
-              }}
-            />
-            <Text style={styles.textcolor}>Borrowed</Text>
+            <Text>Hi, Deepak</Text>
+          </View>
+          <Pressable onPress={() => router.push('/activity')}>
+          <View style={styles.notification}>
+            <Ionicons name="notifications" size={24} color="black" />
+              {true && ( // Replace 'true' with your condition
+                <View style={styles.badge} />
+              )}
+            </View>
+          </Pressable>
+        </View>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardText}>Total Spend(Lent+Borrowed)</Text>
+            <Text style={styles.textcolor}>$100</Text>
+          </View>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardText}>Active Group</Text>
+            <Text style={styles.textcolor}>2</Text>
+          </View>
+          <View style={styles.chart}>
+            <View style={styles.chartContainer}>
+              <PieChart
+                donut
+                innerRadius={50}
+                radius={70}
+                data={lentData}
+                centerLabelComponent={() => {
+                  return <Text style={{ fontSize: 24 }}>70%</Text>;
+                }}
+              />
+              <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
+                <Text style={{ color: 'yellow' }}>Lent </Text>
+                <Text style={{ color: 'white' }}>$200</Text>
+              </View>
+            </View>
+            <View>
+              <PieChart
+                donut
+                innerRadius={50}
+                radius={70}
+                data={borrowData}
+                centerLabelComponent={() => {
+                  return <Text style={{ fontSize: 24 }}>50%</Text>;
+                }}
+              />
+              <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
+                <Text style={{ color: 'yellow' }}>Borrowed </Text>
+                <Text style={{ color: 'white' }}>$200</Text>
+              </View>
+            </View>
           </View>
         </View>
 
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={styles.title}>Recent groups</Text>
+          <Pressable onPress={() => router.push('/groups')}>
+            <Text style={{ color: colors.textGray }}>See all</Text>
+          </Pressable>
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
+          {[1, 2, 3].map((item) => (
+            <View key={item} style={styles.scrollCard}>
+              <View style={styles.scrollCardHeader}>
+                <Text style={styles.scrollCardTitle}>Group {item}</Text>
+                <Text style={styles.scrollCardAmount}>$150</Text>
+              </View>
+              <Text style={styles.scrollCardDescription}>
+                Last transaction on 24 March
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
 
       </View>
-      <Text style={styles.title}>Chat</Text>
     </View>
   );
 }
@@ -80,6 +117,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  subcontainer: {
+    flex: 1,
+    backgroundColor: "#f9faf9",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 10,
     paddingTop: 20,
   },
@@ -109,7 +152,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0553',
   },
   card: {
-    height: 280, // Increased height to accommodate the chart
+    height: 270, // Increased height to accommodate the chart
     width: '100%',
     backgroundColor: colors.primary,
     marginTop: 16,
@@ -142,5 +185,41 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 16,
+  },
+  scrollView: {
+    marginBottom: 10,
+  },
+  scrollCard: {
+    backgroundColor: 'white',
+    padding: 16,
+    marginRight: 12,
+    borderRadius: 12,
+    width: 200,
+    borderColor: '#E5E5E5',
+    borderWidth: 1,
+  },
+  scrollCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  scrollCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scrollCardAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.primary,
+  },
+  scrollCardDescription: {
+    fontSize: 14,
+    color: '#666',
   },
 }); 

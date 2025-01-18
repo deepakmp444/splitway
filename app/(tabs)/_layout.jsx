@@ -24,6 +24,9 @@ export default function TabLayout() {
                     headerShown: false,
                     headerShadowVisible: false,
                     tabBarShadowVisible: false,
+                    sceneContainerStyle: {
+                        backgroundColor: 'white'
+                    }
                 }}>
                 <Tabs.Screen
                     name="index"
