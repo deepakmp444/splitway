@@ -1,16 +1,17 @@
+import React, { useCallback, useRef } from 'react';
 import { Image } from 'expo-image';
-import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from "react-native-gifted-charts";
 import { useRouter } from 'expo-router';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { colors } from '../../util/constant';
-import { useState } from 'react';
 
-export default function Chat() {
+
+export default function Home() {
   const router = useRouter();
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [menuVisible, setMenuVisible] = useState(false);
-
+  const bottomSheetRef = useRef(null);
+  const snapPoints = ['45%'];
   const lentData = [
     { value: 70, color: '#38b000' },
     { value: 30, color: '#f0f0f0' }
@@ -88,109 +89,49 @@ export default function Chat() {
             </View>
           </View>
         </View>
-        <ScrollView
-          style={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
+
+        <BottomSheet
+          ref={bottomSheetRef}
+          snapPoints={snapPoints}
+          enablePanDownToClose={false}
+          backgroundStyle={{ backgroundColor: "#f9faf9", }}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={styles.title}>Recent groups</Text>
-            <Pressable onPress={() => router.push('/groups')}>
-              <Text style={{ color: colors.textGray }}>See all</Text>
-            </Pressable>
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
-            {[1, 2, 3].map((item) => (
-              <View key={item} style={styles.scrollCard}>
-                <View style={styles.scrollCardHeader}>
-                  <Text style={styles.scrollCardTitle}>Group {item}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={styles.scrollCardAmount}>$150</Text>
-                    <Pressable 
-                      onPress={() => {
-                        setSelectedCard(item);
-                        setMenuVisible(true);
-                      }}
-                    >
-                      <Ionicons name="ellipsis-vertical" size={20} color="black" />
-                    </Pressable>
-                  </View>
-                </View>
-                <Text style={styles.scrollCardDescription}>
-                  Last transaction on 24 March
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View style={styles.stickyHeader}>
             <Text style={styles.title}>Recent Transactions</Text>
-            <Pressable onPress={() => router.push('/transactions')}>
-              <Text style={{ color: colors.textGray }}>See all</Text>
-            </Pressable>
           </View>
 
-          <View style={styles.transactionList}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-              <View key={item} style={styles.transactionCard}>
-                <View style={styles.transactionLeft}>
-                  <View style={styles.transactionIcon}>
-                    <Ionicons
-                      name={item % 2 === 0 ? "arrow-up" : "arrow-down"}
-                      size={24}
-                      color={item % 2 === 0 ? "#38b000" : "#ff0000"}
-                    />
+          <BottomSheetScrollView>
+            <View style={{ padding: 10 }}>
+              <View style={styles.transactionList}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
+                  <View key={item} style={styles.transactionCard}>
+                    <View style={styles.transactionLeft}>
+                      <View style={styles.transactionIcon}>
+                        <Ionicons
+                          name={item % 2 === 0 ? "arrow-up" : "arrow-down"}
+                          size={24}
+                          color={item % 2 === 0 ? "#38b000" : "#ff0000"}
+                        />
+                      </View>
+                      <View>
+                        <Text style={styles.transactionTitle}>Transaction {item}</Text>
+                        <Text style={styles.transactionDate}>March 24, 2024</Text>
+                      </View>
+                    </View>
+                    <Text style={[
+                      styles.transactionAmount,
+                      { color: item % 2 === 0 ? "#38b000" : "#ff0000" }
+                    ]}>
+                      {item % 2 === 0 ? "+" : "-"}$120
+                    </Text>
                   </View>
-                  <View>
-                    <Text style={styles.transactionTitle}>Transaction {item}</Text>
-                    <Text style={styles.transactionDate}>March 24, 2024</Text>
-                  </View>
-                </View>
-                <Text style={[
-                  styles.transactionAmount,
-                  { color: item % 2 === 0 ? "#38b000" : "#ff0000" }
-                ]}>
-                  {item % 2 === 0 ? "+" : "-"}$120
-                </Text>
+                ))}
               </View>
-            ))}
-          </View>
-        </ScrollView>
+            </View>
+          </BottomSheetScrollView>
+        </BottomSheet>
+
       </View>
-
-      <Modal
-        transparent
-        visible={menuVisible}
-        onRequestClose={() => setMenuVisible(false)}
-        animationType="fade"
-      >
-        <Pressable 
-          style={styles.modalOverlay}
-          onPress={() => setMenuVisible(false)}
-        >
-          <View style={styles.menuContainer}>
-            <Pressable 
-              style={styles.menuItem}
-              onPress={() => {
-                // Handle activate/deactivate
-                setMenuVisible(false);
-              }}
-            >
-              <Text>Activate/Deactivate</Text>
-            </Pressable>
-            <Pressable 
-              style={[styles.menuItem, { borderTopWidth: 1, borderTopColor: '#E5E5E5' }]}
-              onPress={() => {
-                // Handle delete
-                setMenuVisible(false);
-              }}
-            >
-              <Text style={{ color: 'red' }}>Delete</Text>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
-
     </View>
   );
 }
@@ -208,6 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9faf9",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    // padding: 10,?
     paddingHorizontal: 10,
     paddingTop: 20,
   },
@@ -345,20 +287,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+  stickyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  menuContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    width: 200,
-    overflow: 'hidden',
-  },
-  menuItem: {
-    padding: 16,
-    alignItems: 'center',
+    padding: 10,
   },
 }); 
