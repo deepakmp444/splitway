@@ -11,7 +11,6 @@ export default function TabLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} >
                 <StatusBar style="dark" backgroundColor="white" />
-
                 <Tabs
                     screenOptions={{
                         tabBarActiveTintColor: colors.primary,

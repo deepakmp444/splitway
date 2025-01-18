@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { Image } from 'expo-image';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from "react-native-gifted-charts";
 import { useRouter } from 'expo-router';
@@ -11,7 +11,13 @@ import { colors } from '../../util/constant';
 export default function Home() {
   const router = useRouter();
   const bottomSheetRef = useRef(null);
-  const snapPoints = ['45%'];
+  const snapPoints = ['45%', '100%'];
+  const [currentSnapPoint, setCurrentSnapPoint] = React.useState(0);
+
+  const handleSheetChanges = useCallback((index) => {
+    setCurrentSnapPoint(index);
+  }, []);
+
   const lentData = [
     { value: 70, color: '#38b000' },
     { value: 30, color: '#f0f0f0' }
@@ -47,6 +53,7 @@ export default function Home() {
             </View>
           </Pressable>
         </View>
+
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardText}>Total Spend(Lent+Borrowed)</Text>
@@ -94,12 +101,26 @@ export default function Home() {
           ref={bottomSheetRef}
           snapPoints={snapPoints}
           enablePanDownToClose={false}
-          backgroundStyle={{ backgroundColor: "#f9faf9", }}
+          backgroundStyle={{ backgroundColor: "#f9faf9" }}
+          onChange={handleSheetChanges}
+          index={0}
         >
           <View style={styles.stickyHeader}>
-            <Text style={styles.title}>Recent Transactions</Text>
+            <Text style={{ fontWeight: 'bold' }}>Recent Transactions</Text>
           </View>
-
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search transactions..."
+              placeholderTextColor="#666"
+              onFocus={() => {
+                if (currentSnapPoint === 0) {
+                  bottomSheetRef.current?.snapToIndex(1);
+                }
+                router.push('/search');
+              }}
+            />
+          </View>
           <BottomSheetScrollView>
             <View style={{ padding: 10 }}>
               <View style={styles.transactionList}>
@@ -292,5 +313,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 10,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingHorizontal: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 44,
+    backgroundColor: 'white',
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  searchButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
   },
 }); 
