@@ -1,13 +1,15 @@
 import { Image } from 'expo-image';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from "react-native-gifted-charts";
 import { useRouter } from 'expo-router';
 import { colors } from '../../util/constant';
-
+import { useState } from 'react';
 
 export default function Chat() {
   const router = useRouter();
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const lentData = [
     { value: 70, color: '#38b000' },
@@ -21,23 +23,23 @@ export default function Chat() {
 
   return (
     <View style={styles.container}>
+
       <View style={styles.subcontainer}>
         <View style={styles.header}>
           <Pressable onPress={() => router.push('/account')}>
-          <Image
-            style={styles.image}
-            source="https://picsum.photos/200"
-            contentFit="cover"
-            transition={1000}
-          />
-           {/* <Text>Hi, Deepak</Text> */}
+            <Image
+              style={styles.image}
+              source="https://picsum.photos/200"
+              contentFit="cover"
+              transition={1000}
+            />
           </Pressable>
           <View>
             <Text>Hi, Deepak</Text>
           </View>
           <Pressable onPress={() => router.push('/activity')}>
-          <View style={styles.notification}>
-            <Ionicons name="notifications" size={24} color="black" />
+            <View style={styles.notification}>
+              <Ionicons name="notifications" size={24} color="black" />
               {true && ( // Replace 'true' with your condition
                 <View style={styles.badge} />
               )}
@@ -86,29 +88,109 @@ export default function Chat() {
             </View>
           </View>
         </View>
+        <ScrollView
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <Text style={styles.title}>Recent groups</Text>
+            <Pressable onPress={() => router.push('/groups')}>
+              <Text style={{ color: colors.textGray }}>See all</Text>
+            </Pressable>
+          </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={styles.title}>Recent groups</Text>
-          <Pressable onPress={() => router.push('/groups')}>
-            <Text style={{ color: colors.textGray }}>See all</Text>
-          </Pressable>
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
-          {[1, 2, 3].map((item) => (
-            <View key={item} style={styles.scrollCard}>
-              <View style={styles.scrollCardHeader}>
-                <Text style={styles.scrollCardTitle}>Group {item}</Text>
-                <Text style={styles.scrollCardAmount}>$150</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
+            {[1, 2, 3].map((item) => (
+              <View key={item} style={styles.scrollCard}>
+                <View style={styles.scrollCardHeader}>
+                  <Text style={styles.scrollCardTitle}>Group {item}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={styles.scrollCardAmount}>$150</Text>
+                    <Pressable 
+                      onPress={() => {
+                        setSelectedCard(item);
+                        setMenuVisible(true);
+                      }}
+                    >
+                      <Ionicons name="ellipsis-vertical" size={20} color="black" />
+                    </Pressable>
+                  </View>
+                </View>
+                <Text style={styles.scrollCardDescription}>
+                  Last transaction on 24 March
+                </Text>
               </View>
-              <Text style={styles.scrollCardDescription}>
-                Last transaction on 24 March
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
+            ))}
+          </ScrollView>
 
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <Text style={styles.title}>Recent Transactions</Text>
+            <Pressable onPress={() => router.push('/transactions')}>
+              <Text style={{ color: colors.textGray }}>See all</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.transactionList}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
+              <View key={item} style={styles.transactionCard}>
+                <View style={styles.transactionLeft}>
+                  <View style={styles.transactionIcon}>
+                    <Ionicons
+                      name={item % 2 === 0 ? "arrow-up" : "arrow-down"}
+                      size={24}
+                      color={item % 2 === 0 ? "#38b000" : "#ff0000"}
+                    />
+                  </View>
+                  <View>
+                    <Text style={styles.transactionTitle}>Transaction {item}</Text>
+                    <Text style={styles.transactionDate}>March 24, 2024</Text>
+                  </View>
+                </View>
+                <Text style={[
+                  styles.transactionAmount,
+                  { color: item % 2 === 0 ? "#38b000" : "#ff0000" }
+                ]}>
+                  {item % 2 === 0 ? "+" : "-"}$120
+                </Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
+
+      <Modal
+        transparent
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
+        animationType="fade"
+      >
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={() => setMenuVisible(false)}
+        >
+          <View style={styles.menuContainer}>
+            <Pressable 
+              style={styles.menuItem}
+              onPress={() => {
+                // Handle activate/deactivate
+                setMenuVisible(false);
+              }}
+            >
+              <Text>Activate/Deactivate</Text>
+            </Pressable>
+            <Pressable 
+              style={[styles.menuItem, { borderTopWidth: 1, borderTopColor: '#E5E5E5' }]}
+              onPress={() => {
+                // Handle delete
+                setMenuVisible(false);
+              }}
+            >
+              <Text style={{ color: 'red' }}>Delete</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
     </View>
   );
 }
@@ -118,12 +200,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  scrollContainer: {
+    flex: 1,
+  },
   subcontainer: {
     flex: 1,
     backgroundColor: "#f9faf9",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 10,
+    paddingHorizontal: 10,
     paddingTop: 20,
   },
   notification: {
@@ -178,7 +263,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     alignSelf: 'center',
-
   },
   cardHeader: {
     flexDirection: 'row',
@@ -192,7 +276,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   scrollView: {
-    marginBottom: 10,
+    marginTop: 10,
   },
   scrollCard: {
     backgroundColor: 'white',
@@ -221,5 +305,60 @@ const styles = StyleSheet.create({
   scrollCardDescription: {
     fontSize: 14,
     color: '#666',
+  },
+  transactionList: {
+    gap: 8,
+  },
+  transactionCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderColor: '#E5E5E5',
+    borderWidth: 1,
+  },
+  transactionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  transactionIcon: {
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  transactionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  transactionDate: {
+    fontSize: 14,
+    color: '#666',
+  },
+  transactionAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    width: 200,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    padding: 16,
+    alignItems: 'center',
   },
 }); 
