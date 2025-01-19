@@ -1,12 +1,14 @@
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../util/constant';
 import { useState, useMemo } from 'react';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 
 export default function Friends() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState('all'); // 'all', 'requests', 'blocked'
+  const [selectedTab, setSelectedTab] = useState('all'); // 'all', 'requests', 'pending'
+  const router = useRouter();
 
   const friends = [
     {
@@ -58,13 +60,35 @@ export default function Friends() {
     }
   ];
 
+  const pendingRequests = [
+    {
+      id: 'p1',
+      name: 'David Lee',
+      username: '@davidl',
+      requestedAt: '2024-03-25T10:30:00Z',
+      avatar: 'https://picsum.photos/205',
+    },
+    {
+      id: 'p2',
+      name: 'Lisa Park',
+      username: '@lisap',
+      requestedAt: '2024-03-25T09:15:00Z',
+      avatar: 'https://picsum.photos/206',
+    }
+  ];
+
   const filteredFriends = useMemo(() => {
     if (!searchQuery.trim()) {
-      return selectedTab === 'requests' ? friendRequests : friends;
+      if (selectedTab === 'requests') return friendRequests;
+      if (selectedTab === 'pending') return pendingRequests;
+      return friends;
     }
     
     const query = searchQuery.toLowerCase().trim();
-    const dataToSearch = selectedTab === 'requests' ? friendRequests : friends;
+    let dataToSearch = friends;
+    
+    if (selectedTab === 'requests') dataToSearch = friendRequests;
+    if (selectedTab === 'pending') dataToSearch = pendingRequests;
     
     return dataToSearch.filter(friend => 
       friend.name.toLowerCase().includes(query) || 
@@ -72,34 +96,127 @@ export default function Friends() {
     );
   }, [searchQuery, selectedTab]);
 
-  const renderFriendCard = ({ item }) => (
-    <Pressable style={styles.friendCard}>
-      <View style={styles.friendInfo}>
-        <Image
-          source={item.avatar}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={1000}
-        />
-        <View style={styles.friendDetails}>
-          <Text style={styles.friendName}>{item.name}</Text>
-          <Text style={styles.username}>{item.username}</Text>
-        </View>
-      </View>
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
 
-      {selectedTab === 'requests' ? (
-        <View style={styles.requestActions}>
-          <Text style={styles.mutualText}>{item.mutualFriends} mutual friends</Text>
-          <View style={styles.actionButtons}>
-            <Pressable style={[styles.actionButton, styles.acceptButton]}>
-              <Text style={styles.actionButtonText}>Accept</Text>
-            </Pressable>
-            <Pressable style={[styles.actionButton, styles.declineButton]}>
-              <Text style={[styles.actionButtonText, { color: '#666' }]}>Decline</Text>
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    return 'Just now';
+  };
+
+  const renderFriendCard = ({ item }) => {
+    if (selectedTab === 'pending') {
+      return (
+        <Pressable 
+          style={styles.friendCard}
+          onPress={() => router.push({
+            pathname: '/chat',
+            params: {
+              id: item.id,
+              name: item.name,
+              username: item.username,
+              avatar: item.avatar,
+              balance: item.balance
+            }
+          })}
+        >
+          <View style={styles.friendInfo}>
+            <Image
+              source={item.avatar}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={1000}
+            />
+            <View style={styles.friendDetails}>
+              <Text style={styles.friendName}>{item.name}</Text>
+              <Text style={styles.username}>{item.username}</Text>
+              <Text style={styles.timestamp}>Requested {formatTimestamp(item.requestedAt)}</Text>
+            </View>
+          </View>
+          <View style={styles.requestActions}>
+            <Pressable 
+              style={[styles.actionButton, styles.cancelButton]}
+              onPress={() => console.log('Cancel request:', item.id)}
+            >
+              <Text style={[styles.actionButtonText, { color: '#ff0000' }]}>Cancel Request</Text>
             </Pressable>
           </View>
+        </Pressable>
+      );
+    }
+
+    if (selectedTab === 'requests') {
+      return (
+        <Pressable 
+          style={styles.friendCard}
+          onPress={() => router.push({
+            pathname: '/chat',
+            params: {
+              id: item.id,
+              name: item.name,
+              username: item.username,
+              avatar: item.avatar,
+              balance: item.balance
+            }
+          })}
+        >
+          <View style={styles.friendInfo}>
+            <Image
+              source={item.avatar}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={1000}
+            />
+            <View style={styles.friendDetails}>
+              <Text style={styles.friendName}>{item.name}</Text>
+              <Text style={styles.username}>{item.username}</Text>
+              <Text style={styles.mutualText}>{item.mutualFriends} mutual friends</Text>
+            </View>
+          </View>
+          <View style={styles.requestActions}>
+            <View style={styles.actionButtons}>
+              <Pressable style={[styles.actionButton, styles.acceptButton]}>
+                <Text style={styles.actionButtonText}>Accept</Text>
+              </Pressable>
+              <Pressable style={[styles.actionButton, styles.declineButton]}>
+                <Text style={[styles.actionButtonText, { color: '#666' }]}>Decline</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+      );
+    }
+
+    return (
+      <Pressable 
+        style={styles.friendCard}
+        onPress={() => router.push({
+          pathname: '/chat',
+          params: {
+            id: item.id,
+            name: item.name,
+            username: item.username,
+            avatar: item.avatar,
+            balance: item.balance
+          }
+        })}
+      >
+        <View style={styles.friendInfo}>
+          <Image
+            source={item.avatar}
+            style={styles.avatar}
+            contentFit="cover"
+            transition={1000}
+          />
+          <View style={styles.friendDetails}>
+            <Text style={styles.friendName}>{item.name}</Text>
+            <Text style={styles.username}>{item.username}</Text>
+          </View>
         </View>
-      ) : (
         <View style={styles.friendStats}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{item.totalSharedGroups}</Text>
@@ -122,15 +239,18 @@ export default function Friends() {
             <Text style={styles.statLabel}>Balance</Text>
           </View>
         </View>
-      )}
-    </Pressable>
-  );
+      </Pressable>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Friends</Text>
-        <Pressable style={styles.addButton}>
+        <Pressable 
+          style={styles.addButton}
+          onPress={() => router.push('/add-friend')}
+        >
           <Ionicons name="person-add" size={24} color="white" />
         </Pressable>
       </View>
@@ -155,23 +275,52 @@ export default function Friends() {
         )}
       </View>
 
-      <View style={styles.tabs}>
-        <Pressable 
-          style={[styles.tab, selectedTab === 'all' && styles.activeTab]}
-          onPress={() => setSelectedTab('all')}
+      <View style={styles.tabsContainer}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabs}
         >
-          <Text style={[styles.tabText, selectedTab === 'all' && styles.activeTabText]}>
-            All Friends ({friends.length})
-          </Text>
-        </Pressable>
-        <Pressable 
-          style={[styles.tab, selectedTab === 'requests' && styles.activeTab]}
-          onPress={() => setSelectedTab('requests')}
-        >
-          <Text style={[styles.tabText, selectedTab === 'requests' && styles.activeTabText]}>
-            Requests ({friendRequests.length})
-          </Text>
-        </Pressable>
+          <Pressable 
+            style={[styles.tab, selectedTab === 'all' && styles.activeTab]}
+            onPress={() => setSelectedTab('all')}
+          >
+            <Text style={[styles.tabText, selectedTab === 'all' && styles.activeTabText]}>
+              All Friends
+            </Text>
+            <View style={[styles.badge, selectedTab === 'all' && styles.activeBadge]}>
+              <Text style={[styles.badgeText, selectedTab === 'all' && styles.activeBadgeText]}>
+                {friends.length}
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable 
+            style={[styles.tab, selectedTab === 'requests' && styles.activeTab]}
+            onPress={() => setSelectedTab('requests')}
+          >
+            <Text style={[styles.tabText, selectedTab === 'requests' && styles.activeTabText]}>
+              Requests
+            </Text>
+            <View style={[styles.badge, selectedTab === 'requests' && styles.activeBadge]}>
+              <Text style={[styles.badgeText, selectedTab === 'requests' && styles.activeBadgeText]}>
+                {friendRequests.length}
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable 
+            style={[styles.tab, selectedTab === 'pending' && styles.activeTab]}
+            onPress={() => setSelectedTab('pending')}
+          >
+            <Text style={[styles.tabText, selectedTab === 'pending' && styles.activeTabText]}>
+              Pending
+            </Text>
+            <View style={[styles.badge, selectedTab === 'pending' && styles.activeBadge]}>
+              <Text style={[styles.badgeText, selectedTab === 'pending' && styles.activeBadgeText]}>
+                {pendingRequests.length}
+              </Text>
+            </View>
+          </Pressable>
+        </ScrollView>
       </View>
 
       <FlatList
@@ -183,7 +332,9 @@ export default function Friends() {
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              {selectedTab === 'requests' ? 'No friend requests' : 'No friends found'}
+              {selectedTab === 'requests' ? 'No friend requests' : 
+               selectedTab === 'pending' ? 'No pending requests' : 
+               'No friends found'}
             </Text>
           </View>
         )}
@@ -243,28 +394,54 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     padding: 4,
   },
+  tabsContainer: {
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
   tabs: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    paddingHorizontal: 16,
+    gap: 24,
   },
   tab: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: '#E5E5E5',
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 12,
+    gap: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   activeTab: {
-    backgroundColor: colors.primary,
+    borderBottomColor: colors.primary,
   },
   tabText: {
     color: '#666',
     fontWeight: '500',
+    fontSize: 15,
   },
   activeTabText: {
-    color: 'white',
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  badge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+    minWidth: 24,
+    alignItems: 'center',
+  },
+  activeBadge: {
+    backgroundColor: `${colors.primary}15`,
+  },
+  badgeText: {
+    color: '#666',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  activeBadgeText: {
+    color: colors.primary,
   },
   listContainer: {
     padding: 16,
@@ -298,6 +475,11 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  timestamp: {
+    fontSize: 12,
     color: '#666',
   },
   friendStats: {
@@ -334,7 +516,6 @@ const styles = StyleSheet.create({
   mutualText: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 8,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -352,6 +533,11 @@ const styles = StyleSheet.create({
   },
   declineButton: {
     backgroundColor: '#E5E5E5',
+  },
+  cancelButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ff0000',
   },
   actionButtonText: {
     color: 'white',
