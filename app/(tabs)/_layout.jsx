@@ -1,3 +1,4 @@
+import { Stack } from 'expo-router';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,7 +7,7 @@ import { colors } from '../../util/constant';
 
 export default function TabLayout() {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} >
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} edges={['top']}>
             <StatusBar style="dark" backgroundColor="white" />
             <Tabs
                 screenOptions={{
@@ -72,6 +73,6 @@ export default function TabLayout() {
                     }}
                 />
             </Tabs>
-        </SafeAreaView>
+            </SafeAreaView>
     );
 }

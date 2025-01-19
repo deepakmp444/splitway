@@ -1,90 +1,92 @@
 import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../util/constant';
+import { colors } from '../../../util/constant';
 import { useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+// Mock data moved to top
+const groups = [
+  {
+    id: '1',
+    name: 'Weekend Trip',
+    totalSpent: 1200,
+    summary: {
+      youLent: 450,
+      youBorrowed: 330,
+      yourSpent: 400,
+      yourBalance: 120
+    },
+    members: [
+      { id: 'm1', name: 'You', spent: 400, balance: 120 },
+      { id: 'm2', name: 'John', spent: 300, balance: -50 },
+      { id: 'm3', name: 'Sarah', spent: 200, balance: -150 },
+      { id: 'm4', name: 'Mike', spent: 150, balance: 100 },
+      { id: 'm5', name: 'Emma', spent: 150, balance: -20 }
+    ],
+    recentActivity: '2 hours ago',
+    status: 'active',
+  },
+  {
+    id: '2',
+    name: 'House Expenses',
+    totalSpent: 2400,
+    summary: {
+      youLent: 600,
+      youBorrowed: 645,
+      yourSpent: 800,
+      yourBalance: -45
+    },
+    members: [
+      { id: 'm1', name: 'You', spent: 800, balance: -45 },
+      { id: 'm2', name: 'Alex', spent: 900, balance: 200 },
+      { id: 'm3', name: 'Lisa', spent: 700, balance: -155 }
+    ],
+    recentActivity: '1 day ago',
+    status: 'active',
+  },
+  {
+    id: '3',
+    name: 'Movie Night',
+    totalSpent: 240,
+    summary: {
+      youLent: 160,
+      youBorrowed: 0,
+      yourSpent: 80,
+      yourBalance: 80
+    },
+    members: [
+      { id: 'm1', name: 'You', spent: 80, balance: 80 },
+      { id: 'm2', name: 'Tom', spent: 60, balance: -40 },
+      { id: 'm3', name: 'Kate', spent: 50, balance: -20 },
+      { id: 'm4', name: 'David', spent: 50, balance: -20 }
+    ],
+    recentActivity: '2 days ago',
+    status: 'active',
+  },
+  {
+    id: '4',
+    name: 'Grocery Split',
+    totalSpent: 350,
+    summary: {
+      youLent: 0,
+      youBorrowed: 75,
+      yourSpent: 50,
+      yourBalance: -75
+    },
+    members: [
+      { id: 'm1', name: 'You', spent: 50, balance: -75 },
+      { id: 'm2', name: 'Ryan', spent: 200, balance: 125 },
+      { id: 'm3', name: 'Sophie', spent: 100, balance: -50 }
+    ],
+    recentActivity: '3 days ago',
+    status: 'settled',
+  }
+];
 
 export default function Groups() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-
-  const groups = [
-    {
-      id: '1',
-      name: 'Weekend Trip',
-      totalSpent: 1200,
-      summary: {
-        youLent: 450,
-        youBorrowed: 330,
-        yourSpent: 400,
-        yourBalance: 120
-      },
-      members: [
-        { id: 'm1', name: 'You', spent: 400, balance: 120 },
-        { id: 'm2', name: 'John', spent: 300, balance: -50 },
-        { id: 'm3', name: 'Sarah', spent: 200, balance: -150 },
-        { id: 'm4', name: 'Mike', spent: 150, balance: 100 },
-        { id: 'm5', name: 'Emma', spent: 150, balance: -20 }
-      ],
-      recentActivity: '2 hours ago',
-      status: 'active',
-    },
-    {
-      id: '2',
-      name: 'House Expenses',
-      totalSpent: 2400,
-      summary: {
-        youLent: 600,
-        youBorrowed: 645,
-        yourSpent: 800,
-        yourBalance: -45
-      },
-      members: [
-        { id: 'm1', name: 'You', spent: 800, balance: -45 },
-        { id: 'm2', name: 'Alex', spent: 900, balance: 200 },
-        { id: 'm3', name: 'Lisa', spent: 700, balance: -155 }
-      ],
-      recentActivity: '1 day ago',
-      status: 'active',
-    },
-    {
-      id: '3',
-      name: 'Movie Night',
-      totalSpent: 240,
-      summary: {
-        youLent: 160,
-        youBorrowed: 0,
-        yourSpent: 80,
-        yourBalance: 80
-      },
-      members: [
-        { id: 'm1', name: 'You', spent: 80, balance: 80 },
-        { id: 'm2', name: 'Tom', spent: 60, balance: -40 },
-        { id: 'm3', name: 'Kate', spent: 50, balance: -20 },
-        { id: 'm4', name: 'David', spent: 50, balance: -20 }
-      ],
-      recentActivity: '2 days ago',
-      status: 'active',
-    },
-    {
-      id: '4',
-      name: 'Grocery Split',
-      totalSpent: 350,
-      summary: {
-        youLent: 0,
-        youBorrowed: 75,
-        yourSpent: 50,
-        yourBalance: -75
-      },
-      members: [
-        { id: 'm1', name: 'You', spent: 50, balance: -75 },
-        { id: 'm2', name: 'Ryan', spent: 200, balance: 125 },
-        { id: 'm3', name: 'Sophie', spent: 100, balance: -50 }
-      ],
-      recentActivity: '3 days ago',
-      status: 'settled',
-    }
-  ];
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery.trim()) return groups;
@@ -95,7 +97,7 @@ export default function Groups() {
   const renderGroupCard = ({ item }) => (
     <Pressable 
       style={styles.groupCard}
-      onPress={() => router.push(`/group/${item.id}`)}
+      onPress={() => router.push(`/groups/${item.id}`)}
     >
       <View style={styles.groupHeader}>
         <View style={styles.groupTitleContainer}>
@@ -175,12 +177,12 @@ export default function Groups() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Groups</Text>
         <Pressable 
           style={styles.createButton}
-          onPress={() => router.push('/create-group')}
+          onPress={() => router.push('/groups/create-group')}
         >
           <Ionicons name="add" size={24} color="white" />
         </Pressable>
@@ -218,14 +220,14 @@ export default function Groups() {
           </View>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9faf9',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -238,7 +240,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#000',
   },
   createButton: {
     backgroundColor: colors.primary,
@@ -247,6 +250,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   searchContainer: {
     flexDirection: 'row',

@@ -19,31 +19,101 @@ export default function Chat() {
   // Mock chat messages
   const [messages, setMessages] = useState([
     {
-      id: 'm1',
-      text: 'Hey, can you settle up for the dinner?',
+      id: 'm50',
+      text: "Hey! How's your day going?",
       sender: 'user',
-      timestamp: '2024-03-25T20:30:00Z',
+      timestamp: '2024-03-25T10:00:00Z',
       reactions: [],
     },
     {
-      id: 'm2',
-      text: 'Sure! Let me check the amount',
+      id: 'm49',
+      text: "Pretty good! Just finished a big project at work 🎉",
       sender: params.id,
-      timestamp: '2024-03-25T20:31:00Z',
+      timestamp: '2024-03-25T10:01:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm48',
+      text: "That's awesome! We should celebrate",
+      sender: 'user',
+      timestamp: '2024-03-25T10:02:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm47',
+      text: "Definitely! How about dinner tomorrow?",
+      sender: params.id,
+      timestamp: '2024-03-25T10:03:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm46',
+      text: "Perfect! That new Italian place?",
+      sender: 'user',
+      timestamp: '2024-03-25T10:04:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm45',
+      text: "Yes! I've heard great reviews about it",
+      sender: params.id,
+      timestamp: '2024-03-25T10:05:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm44',
+      text: "Should we invite others?",
+      sender: 'user',
+      timestamp: '2024-03-25T10:06:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm43',
+      text: "Maybe Sarah and Mike?",
+      sender: params.id,
+      timestamp: '2024-03-25T10:07:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm42',
+      text: "Good idea! I'll create a group",
+      sender: 'user',
+      timestamp: '2024-03-25T10:08:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm41',
+      text: "Great! What time works best?",
+      sender: params.id,
+      timestamp: '2024-03-25T10:09:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm4',
+      text: "Perfect, I'll transfer it right now",
+      sender: params.id,
+      timestamp: '2024-03-25T20:32:00Z',
       reactions: [],
     },
     {
       id: 'm3',
-      text: 'It was $45 for your share',
+      text: "It was $45 for your share",
       sender: 'user',
       timestamp: '2024-03-25T20:31:30Z',
       reactions: [],
     },
     {
-      id: 'm4',
-      text: 'Perfect, transfer it right now',
+      id: 'm2',
+      text: "Sure! Let me check the amount",
       sender: params.id,
-      timestamp: '2024-03-25T20:32:00Z',
+      timestamp: '2024-03-25T20:31:00Z',
+      reactions: [],
+    },
+    {
+      id: 'm1',
+      text: "Hey, can you settle up for the dinner?",
+      sender: 'user',
+      timestamp: '2024-03-25T20:30:00Z',
       reactions: [],
     },
   ]);
@@ -56,22 +126,20 @@ export default function Chat() {
   const handleReaction = (reaction) => {
     if (!selectedMessage) return;
 
-    setMessages(messages.map(msg => {
+    setMessages(prevMessages => prevMessages.map(msg => {
       if (msg.id === selectedMessage.id) {
         const existingReactionIndex = msg.reactions.findIndex(r => 
           r.reaction === reaction && r.sender === 'user'
         );
         
         if (existingReactionIndex > -1) {
-          // Remove existing reaction
           const newReactions = [...msg.reactions];
           newReactions.splice(existingReactionIndex, 1);
           return { ...msg, reactions: newReactions };
         } else {
-          // Add new reaction
           return {
             ...msg,
-            reactions: [...msg.reactions, { reaction, sender: 'user' }]
+            reactions: [...msg.reactions, { reaction, sender: 'user', timestamp: new Date().toISOString() }]
           };
         }
       }
@@ -114,11 +182,6 @@ export default function Chat() {
 
     return (
       <View style={styles.pinnedSection}>
-        <View style={styles.pinnedHeader}>
-          <Ionicons name="pin" size={16} color={colors.primary} />
-          <Text style={styles.pinnedTitle}>Pinned Messages</Text>
-          <Text style={styles.pinnedCount}>{pinned.length}</Text>
-        </View>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -133,13 +196,10 @@ export default function Chat() {
                 console.log('Scroll to message:', msg.id);
               }}
             >
-              <View style={styles.pinnedCardHeader}>
-                <Ionicons name="pin" size={14} color={colors.primary} />
-                <Text style={styles.pinnedTime}>{formatTime(msg.timestamp)}</Text>
-              </View>
               <Text style={styles.pinnedText} numberOfLines={2}>
                 {msg.text}
               </Text>
+              <Text style={styles.pinnedTime}>{formatTime(msg.timestamp)}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -150,63 +210,49 @@ export default function Chat() {
   const renderMessage = ({ item }) => (
     <TouchableOpacity
       onLongPress={() => handleLongPress(item)}
-      activeOpacity={0.8}
-      delayLongPress={200}
+      activeOpacity={0.9}
+      style={[
+        styles.messageRow,
+        item.sender === 'user' ? styles.userMessageRow : styles.friendMessageRow
+      ]}
     >
-      <View style={[
-        styles.messageContainer,
-        item.sender === 'user' ? styles.userMessage : styles.friendMessage
-      ]}>
-        {item.sender !== 'user' && (
-          <Image
-            source={params.avatar}
-            style={styles.messageAvatar}
-            contentFit="cover"
-          />
-        )}
-        <View style={styles.messageContent}>
-          <View style={[
-            styles.messageBubble,
-            item.sender === 'user' ? styles.userBubble : styles.friendBubble
+      {item.sender !== 'user' && (
+        <Image
+          source={params.avatar}
+          style={styles.messageAvatar}
+          contentFit="cover"
+        />
+      )}
+      <View>
+        <View style={[
+          styles.messageBubble,
+          item.sender === 'user' ? styles.userBubble : styles.friendBubble
+        ]}>
+          <Text style={[
+            styles.messageText,
+            item.sender === 'user' ? styles.userMessageText : styles.friendMessageText
           ]}>
-            {pinnedMessages.has(item.id) && (
-              <View style={[
-                styles.pinIndicator,
-                item.sender === 'user' ? styles.userPinIndicator : styles.friendPinIndicator
-              ]}>
-                <Ionicons 
-                  name="pin" 
-                  size={12} 
-                  color={colors.primary}
-                />
-              </View>
-            )}
-            <Text style={[
-              styles.messageText,
-              item.sender === 'user' ? styles.userMessageText : styles.friendMessageText
-            ]}>
-              {item.text}
-            </Text>
-          </View>
+            {item.text}
+          </Text>
           <Text style={[
             styles.messageTime,
             item.sender === 'user' ? styles.userMessageTime : styles.friendMessageTime
           ]}>
             {formatTime(item.timestamp)}
           </Text>
-          {item.reactions.length > 0 && (
-            <View style={[
-              styles.reactionsContainer,
-              item.sender === 'user' ? styles.userReactions : styles.friendReactions
-            ]}>
-              {item.reactions.map((reaction, index) => (
-                <View key={index} style={styles.reactionBadge}>
-                  <Text style={styles.reactionEmoji}>{reaction.reaction}</Text>
-                </View>
-              ))}
-            </View>
-          )}
         </View>
+        {item.reactions.length > 0 && (
+          <View style={[
+            styles.reactionsContainer,
+            item.sender === 'user' ? styles.userReactions : styles.friendReactions
+          ]}>
+            {item.reactions.map((reaction, index) => (
+              <Text key={index} style={styles.reactionBadge}>
+                {reaction.reaction}
+              </Text>
+            ))}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -218,78 +264,52 @@ export default function Chat() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable 
-            style={styles.iconButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.primary} />
-          </Pressable>
-          <Pressable 
-            style={styles.userInfo}
-            onPress={() => router.push({
-              pathname: '/chat-settings',
-              params: {
-                id: params.id,
-                name: params.name,
-                username: params.username,
-                avatar: params.avatar,
-                balance: params.balance
-              }
-            })}
-          >
+        <View style={styles.headerContent}>
+          <View style={styles.headerLeft}>
+            <Pressable 
+              style={styles.iconButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </Pressable>
             <Image
               source={params.avatar}
               style={styles.avatar}
               contentFit="cover"
               transition={1000}
             />
-            <View style={styles.nameContainer}>
-              <Text style={styles.headerName}>{params.name}</Text>
-              <Text style={styles.headerUsername}>{params.username}</Text>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName} numberOfLines={1}>{params.name}</Text>
+              <Text style={styles.userUsername} numberOfLines={1}>{params.username}</Text>
             </View>
-          </Pressable>
+          </View>
+          <View style={styles.headerRight}>
+            <Text style={[
+              styles.balanceAmount,
+              { color: params.balance >= 0 ? '#38b000' : '#ff0000' }
+            ]}>
+              {params.balance >= 0 ? '+' : '-'}${Math.abs(params.balance)}
+            </Text>
+            <Pressable 
+              style={styles.settleButton}
+              onPress={() => console.log('Settle up')}
+            >
+              <Ionicons name="wallet-outline" size={16} color={colors.primary} />
+            </Pressable>
+            <Pressable 
+              style={styles.iconButton}
+              onPress={() => router.push({
+                pathname: '/chat-settings',
+                params: { ...params }
+              })}
+            >
+              <Ionicons name="ellipsis-horizontal" size={20} color="#000" />
+            </Pressable>
+          </View>
         </View>
-        <View style={styles.headerRight}>
-          <Pressable 
-            style={styles.iconButton}
-            onPress={() => router.push({
-              pathname: '/chat-settings',
-              params: {
-                id: params.id,
-                name: params.name,
-                username: params.username,
-                avatar: params.avatar,
-                balance: params.balance
-              }
-            })}
-          >
-            <Ionicons name="settings" size={22} color={colors.primary} />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Balance Card */}
-      <View style={styles.balanceCard}>
-        <View style={styles.balanceInfo}>
-          <Text style={styles.balanceLabel}>Current Balance</Text>
-          <Text style={[
-            styles.balanceAmount,
-            { color: params.balance >= 0 ? '#38b000' : '#ff0000' }
-          ]}>
-            {params.balance >= 0 ? '+' : '-'}${Math.abs(params.balance)}
-          </Text>
-        </View>
-        <Pressable 
-          style={styles.settleButton}
-          onPress={() => console.log('Settle up')}
-        >
-          <Ionicons name="wallet" size={20} color="white" style={{ marginRight: 4 }} />
-          <Text style={styles.settleButtonText}>Settle Up</Text>
-        </Pressable>
       </View>
 
       {/* Pinned Messages */}
@@ -354,11 +374,15 @@ export default function Chat() {
         style={styles.inputContainer}
       >
         <View style={styles.inputWrapper}>
+          <Pressable style={styles.attachButton}>
+            <Ionicons name="add-circle-outline" size={24} color={colors.primary} />
+          </Pressable>
           <TextInput
             style={styles.input}
             value={message}
             onChangeText={setMessage}
             placeholder="Type a message..."
+            placeholderTextColor="#666"
             multiline
             maxLength={500}
           />
@@ -373,7 +397,7 @@ export default function Chat() {
             <Ionicons 
               name="send" 
               size={20} 
-              color={message.trim() ? 'white' : '#666'} 
+              color={message.trim() ? colors.primary : '#ccc'} 
             />
           </Pressable>
         </View>
@@ -385,55 +409,54 @@ export default function Chat() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9faf9',
+    backgroundColor: '#fff',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    paddingHorizontal: 16,
-    backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
     flex: 1,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
+    minWidth: 0,
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: `${colors.primary}10`,
+    backgroundColor: '#f8f8f8',
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: `${colors.primary}30`,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f0f0f0',
   },
-  nameContainer: {
+  userInfo: {
     flex: 1,
+    minWidth: 0,
   },
-  headerName: {
-    fontSize: 16,
+  userName: {
+    fontSize: 15,
     fontWeight: '600',
     color: '#000',
+    marginBottom: 1,
   },
-  headerUsername: {
-    fontSize: 13,
+  userUsername: {
+    fontSize: 12,
     color: '#666',
   },
   headerRight: {
@@ -441,109 +464,60 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  balanceCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  balanceInfo: {
-    flex: 1,
-  },
-  balanceLabel: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
-  },
   balanceAmount: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: '600',
   },
   settleButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    flexDirection: 'row',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
-  },
-  settleButtonText: {
-    color: 'white',
-    fontWeight: '500',
+    justifyContent: 'center',
+    backgroundColor: `${colors.primary}15`,
   },
   messagesList: {
     padding: 16,
     gap: 8,
   },
-  messageContainer: {
+  messageRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
     marginBottom: 16,
-    gap: 8,
+    maxWidth: '85%',
+  },
+  userMessageRow: {
+    alignSelf: 'flex-end',
+  },
+  friendMessageRow: {
+    alignSelf: 'flex-start',
   },
   messageAvatar: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    marginLeft: 4,
-  },
-  messageContent: {
-    flex: 1,
-    maxWidth: '80%',
-  },
-  userMessage: {
-    justifyContent: 'flex-end',
-  },
-  friendMessage: {
-    justifyContent: 'flex-start',
+    marginRight: 8,
+    alignSelf: 'flex-end',
+    marginBottom: 4,
   },
   messageBubble: {
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 20,
     maxWidth: '100%',
   },
   userBubble: {
     backgroundColor: colors.primary,
     borderBottomRightRadius: 4,
-    marginLeft: 'auto',
   },
   friendBubble: {
-    backgroundColor: 'white',
+    backgroundColor: '#f0f0f0',
     borderBottomLeftRadius: 4,
-    marginRight: 'auto',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  pinIndicator: {
-    position: 'absolute',
-    top: -8,
-    backgroundColor: 'white',
-    padding: 4,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  userPinIndicator: {
-    right: 8,
-  },
-  friendPinIndicator: {
-    left: 8,
   },
   messageText: {
     fontSize: 15,
     lineHeight: 20,
   },
   userMessageText: {
-    color: 'white',
+    color: '#fff',
   },
   friendMessageText: {
     color: '#000',
@@ -553,39 +527,93 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   userMessageTime: {
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'right',
-    marginRight: 4,
   },
   friendMessageTime: {
     color: '#666',
-    marginLeft: 4,
   },
-  reactionsContainer: {
+  inputContainer: {
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+  inputWrapper: {
     flexDirection: 'row',
-    gap: 4,
-    marginTop: 4,
+    alignItems: 'flex-end',
+    gap: 8,
+    padding: 12,
   },
-  userReactions: {
-    justifyContent: 'flex-end',
-  },
-  friendReactions: {
-    justifyContent: 'flex-start',
-  },
-  reactionBadge: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 4,
-    minWidth: 24,
+  attachButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    justifyContent: 'center',
+    backgroundColor: '#f8f8f8',
   },
-  reactionEmoji: {
+  input: {
+    flex: 1,
+    fontSize: 16,
+    maxHeight: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 20,
+    color: '#000',
+  },
+  sendButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f8f8',
+  },
+  sendButtonDisabled: {
+    opacity: 0.7,
+  },
+  pinnedSection: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    maxHeight: 100,
+  },
+  pinnedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginBottom: 4,
+    gap: 4,
+  },
+  pinnedTitle: {
     fontSize: 12,
+    fontWeight: '500',
+    color: colors.primary,
+  },
+  pinnedList: {
+    paddingHorizontal: 8,
+    gap: 6,
+  },
+  pinnedCard: {
+    backgroundColor: 'white',
+    borderRadius: 6,
+    padding: 6,
+    maxWidth: 140,
+    minWidth: 100,
+    borderWidth: 1,
+    borderColor: `${colors.primary}15`,
+  },
+  pinnedText: {
+    fontSize: 12,
+    color: '#000',
+    lineHeight: 16,
+    marginBottom: 2,
+  },
+  pinnedTime: {
+    fontSize: 10,
+    color: '#666',
   },
   modalOverlay: {
     flex: 1,
@@ -625,96 +653,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
   },
-  pinnedSection: {
-    backgroundColor: '#f8f9fa',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+  reactionEmoji: {
+    fontSize: 20,
   },
-  pinnedHeader: {
+  reactionsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+    paddingHorizontal: 4,
   },
-  pinnedTitle: {
+  userReactions: {
+    justifyContent: 'flex-end',
+  },
+  friendReactions: {
+    justifyContent: 'flex-start',
+  },
+  reactionBadge: {
     fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-    flex: 1,
-  },
-  pinnedCount: {
-    fontSize: 12,
-    color: '#666',
-    backgroundColor: `${colors.primary}15`,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  pinnedList: {
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  pinnedCard: {
     backgroundColor: 'white',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 12,
-    padding: 12,
-    maxWidth: 200,
-    minWidth: 150,
     borderWidth: 1,
-    borderColor: `${colors.primary}30`,
+    borderColor: '#E5E5E5',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 1,
     elevation: 1,
-  },
-  pinnedCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  pinnedText: {
-    fontSize: 14,
-    color: '#000',
-    lineHeight: 20,
-  },
-  pinnedTime: {
-    fontSize: 12,
-    color: '#666',
-  },
-  inputContainer: {
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-    padding: 12,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 12,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    paddingRight: 48,
-    maxHeight: 100,
-    fontSize: 16,
-  },
-  sendButton: {
-    backgroundColor: colors.primary,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButtonDisabled: {
-    backgroundColor: '#E5E5E5',
   },
 }); 
