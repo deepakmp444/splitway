@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Mock data moved to top
+// Mock data
 const groups = [
   {
     id: '1',
@@ -94,10 +94,14 @@ export default function Groups() {
     return groups.filter(group => group.name.toLowerCase().includes(query));
   }, [searchQuery]);
 
+  const handleGroupPress = (groupId) => {
+    router.push(`/groups/${groupId}`);
+  };
+
   const renderGroupCard = ({ item }) => (
     <Pressable 
       style={styles.groupCard}
-      onPress={() => router.push(`/groups/${item.id}`)}
+      onPress={() => handleGroupPress(item.id)}
     >
       <View style={styles.groupHeader}>
         <View style={styles.groupTitleContainer}>
@@ -137,23 +141,6 @@ export default function Groups() {
         </View>
       </View>
 
-      <View style={styles.detailStats}>
-        <View style={styles.detailRow}>
-          <Ionicons name="arrow-up" size={16} color="#38b000" />
-          <Text style={styles.detailLabel}>You Lent:</Text>
-          <Text style={[styles.detailValue, { color: '#38b000' }]}>
-            ${item.summary.youLent}
-          </Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Ionicons name="arrow-down" size={16} color="#ff0000" />
-          <Text style={styles.detailLabel}>You Borrowed:</Text>
-          <Text style={[styles.detailValue, { color: '#ff0000' }]}>
-            ${item.summary.youBorrowed}
-          </Text>
-        </View>
-      </View>
-
       <View style={styles.groupFooter}>
         <View style={styles.memberAvatars}>
           {item.members.slice(0, 3).map((member, index) => (
@@ -163,7 +150,9 @@ export default function Groups() {
                 styles.avatar,
                 { marginLeft: index > 0 ? -10 : 0 }
               ]}
-            />
+            >
+              <Ionicons name="person" size={20} color={colors.primary} />
+            </View>
           ))}
           {item.members.length > 3 && (
             <View style={[styles.avatar, styles.avatarMore]}>
@@ -198,13 +187,9 @@ export default function Groups() {
           placeholderTextColor="#666"
         />
         {searchQuery.length > 0 && (
-          <Ionicons
-            name="close-circle"
-            size={20}
-            color="#666"
-            style={styles.clearIcon}
-            onPress={() => setSearchQuery('')}
-          />
+          <Pressable onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={20} color="#666" />
+          </Pressable>
         )}
       </View>
 
@@ -279,10 +264,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
     height: '100%',
-  },
-  clearIcon: {
-    marginLeft: 8,
-    padding: 4,
   },
   listContainer: {
     padding: 16,
@@ -377,27 +358,5 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: '#666',
-  },
-  detailStats: {
-    marginTop: 8,
-    marginBottom: 16,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 4,
-    marginRight: 8,
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: '500',
   },
 }); 

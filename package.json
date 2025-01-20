@@ -12,6 +12,7 @@
     "@expo/vector-icons": "^14.0.0",
     "@gorhom/bottom-sheet": "^5.0.6",
     "expo": "~52.0.25",
+    "expo-clipboard": "^7.0.1",
     "expo-constants": "~17.0.4",
     "expo-contacts": "^14.0.3",
     "expo-image": "^2.0.4",
