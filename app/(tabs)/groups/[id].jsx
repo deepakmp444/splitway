@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, FlatList, Image, Alert, Modal, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors } from '../../../util/constant';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
@@ -147,7 +147,7 @@ export default function GroupDetails() {
         </View>
         <Pressable 
           style={styles.addButton}
-          onPress={() => {/* Add expense logic */}}
+          onPress={() => router.push(`/add-expense?groupId=${id}`)}
         >
           <Ionicons name="add" size={20} color="white" />
           <Text style={styles.addButtonText}>Add</Text>
@@ -706,7 +706,7 @@ export default function GroupDetails() {
         <Text style={styles.budgetTitle}>Budget Overview</Text>
         <Pressable 
           style={styles.addBudgetButton}
-          onPress={handleAddBudget}
+          onPress={() => router.push(`/(tabs)/groups/manage-budget?groupId=${id}`)}
         >
           <Ionicons name="add-circle-outline" size={24} color={colors.primary} />
           <Text style={styles.addBudgetText}>Add Budget</Text>
