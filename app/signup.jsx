@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -11,7 +11,9 @@ import {
   TouchableWithoutFeedback,
   StatusBar,
   KeyboardAvoidingView,
-  ScrollView
+  ScrollView,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +21,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { colors } from '../util/constant';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser, clearError } from '../store/slices/authSlice';
 
 const signupSchema = yup.object({
   name: yup.string()
@@ -40,8 +44,11 @@ const signupSchema = yup.object({
 
 export default function SignupScreen() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   
+  const { loading, error, isSignup } = useSelector((state) => state.auth);
+
   const { control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
@@ -52,9 +59,21 @@ export default function SignupScreen() {
     mode: 'onBlur',
   });
 
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Registration Error', error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
+  useEffect(() => {
+    if (isSignup) {
+      router.push('/email-verify');
+    }
+  }, [isSignup, router]);
+
   const onSubmit = (data) => {
-    console.log(data);
-    router.push('/email-verify');
+    dispatch(registerUser(data));
   };
 
   return (
@@ -159,12 +178,16 @@ export default function SignupScreen() {
                   {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
                 </View>
               </View>
-
               <TouchableOpacity 
-                style={styles.button}
+                style={[styles.button, loading && styles.buttonDisabled]}
                 onPress={handleSubmit(onSubmit)}
+                disabled={loading}
               >
-                <Text style={styles.buttonText}>Continue</Text>
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Continue</Text>
+                )}
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -258,5 +281,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 }); 

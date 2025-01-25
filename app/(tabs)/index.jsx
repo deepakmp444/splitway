@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { colors } from '../../util/constant';
 import { PieChart, LineChart, BarChart } from 'react-native-gifted-charts';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { storage } from '../../util/storage';
 
 export default function Home() {
   const router = useRouter();
@@ -131,6 +132,8 @@ export default function Home() {
       topColor: colors.primary + '40',
     },
   ];
+
+  console.log("isVerified",storage.getUser());
 
   return (
     <SafeAreaView style={styles.safeArea}>

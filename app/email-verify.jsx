@@ -1,13 +1,44 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors } from '../util/constant';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../util/constant';
+import { useDispatch, useSelector } from 'react-redux';
+import { verifyEmail, clearError } from '../store/slices/authSlice';
 
 export default function EmailVerifyScreen() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef([]);
+
+  const { 
+    verificationLoading, 
+    verificationError, 
+    isVerified,
+    userId 
+  } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (verificationError) {
+      Alert.alert('Verification Error', verificationError);
+      dispatch(clearError());
+    }
+  }, [verificationError, dispatch]);
+
+  useEffect(() => {
+    if (isVerified) {
+      router.replace('/(tabs)');
+    }
+  }, [isVerified, router]);
 
   const handleCodeChange = (text, index) => {
     if (text.length <= 1) {
@@ -23,7 +54,15 @@ export default function EmailVerifyScreen() {
 
   const handleVerify = () => {
     const verificationCode = code.join('');
-    console.log('Verification code:', verificationCode);
+    if (verificationCode.length !== 6) {
+      Alert.alert('Invalid Code', 'Please enter a valid 6-digit verification code');
+      return;
+    }
+
+    dispatch(verifyEmail({
+      userId,
+      verificationCode
+    }));
   };
 
   return (
@@ -41,7 +80,7 @@ export default function EmailVerifyScreen() {
           <TextInput
             key={index}
             ref={(ref) => (inputRefs.current[index] = ref)}
-            style={styles.codeInput}
+            style={[styles.codeInput, digit && styles.filledInput]}
             maxLength={1}
             keyboardType="number-pad"
             value={digit}
@@ -51,10 +90,15 @@ export default function EmailVerifyScreen() {
       </View>
 
       <TouchableOpacity 
-        style={styles.button}
+        style={[styles.button, verificationLoading && styles.buttonDisabled]}
         onPress={handleVerify}
+        disabled={verificationLoading}
       >
-        <Text style={styles.buttonText}>Verify Email</Text>
+        {verificationLoading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Verify Email</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.resendContainer}>
@@ -107,6 +151,10 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
+  filledInput: {
+    borderColor: colors.primary,
+    backgroundColor: '#fff',
+  },
   button: {
     backgroundColor: colors.primary,
     padding: 18,
@@ -125,6 +173,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   resendContainer: {
     flexDirection: 'row',
