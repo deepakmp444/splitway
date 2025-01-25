@@ -11,6 +11,8 @@ export default function RootLayout() {
       <Stack.Screen name="chat-settings" />
       <Stack.Screen name="shared-expenses" />
       <Stack.Screen name="shared-groups" />
+      <Stack.Screen name="signup" />
+      <Stack.Screen name="email-verify" />
     </Stack>
   );
 }
