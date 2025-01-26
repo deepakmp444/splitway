@@ -2,15 +2,18 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-nat
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../util/constant';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { logout } from '../../store/slices/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 export default function Account() {
   const router = useRouter();
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
-
+  const dispatch = useDispatch();
   const userProfile = {
     name: 'Deepak Kumar',
     email: 'deepak@example.com',
@@ -142,6 +145,19 @@ export default function Account() {
     },
   ];
 
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     // router.replace('/(tabs)');
+  //     router.push('/');
+  //   }
+  // }, [isAuthenticated, router]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    // Navigate to the root index screen
+    router.replace('/(auth)');
+  }
+
   return (
     <View style={styles.container}>
       {/* Fixed Header */}
@@ -160,7 +176,7 @@ export default function Account() {
               <Text style={styles.phone}>{userProfile.phone}</Text>
             </View>
           </View>
-          <Pressable 
+          <Pressable
             style={styles.editButton}
             onPress={() => router.push('/edit-profile')}
           >
@@ -170,8 +186,8 @@ export default function Account() {
       </View>
 
       {/* Scrollable Content */}
-      <ScrollView 
-        style={styles.scrollContent} 
+      <ScrollView
+        style={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
@@ -228,12 +244,12 @@ export default function Account() {
         ))}
 
         {/* Logout Button */}
-        <Pressable 
+        <Pressable
           style={styles.logoutButton}
-          onPress={() => {/* Handle logout */}}
+          onPress={() => {/* Handle logout */ }}
         >
           <Ionicons name="log-out" size={20} color="#ff0000" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText} onPress={handleLogout}>Logout</Text>
         </Pressable>
 
         {/* Version Info */}

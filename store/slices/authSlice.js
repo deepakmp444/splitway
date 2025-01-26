@@ -12,6 +12,7 @@ api.interceptors.request.use(
     const token = await storage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log("Token added to request headers:", token);
     }
     return config;
   },
@@ -47,7 +48,7 @@ export const verifyEmail = createAsyncThunk(
     try {
       const apiUrl = `${env.apiUrl}/auth/verify-email`;
       const response = await api.post(apiUrl, verificationData);
-      
+
       // Store token and user data on successful verification
       if (response.data.token) {
         await storage.setToken(response.data.token);
@@ -55,7 +56,7 @@ export const verifyEmail = createAsyncThunk(
       if (response.data.user) {
         await storage.setUser(response.data.user);
       }
-      
+
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -78,13 +79,42 @@ export const checkAuth = createAsyncThunk(
         storage.getToken(),
         storage.getUser()
       ]);
-      
+
       if (token && user) {
         return { token, user };
       }
       return rejectWithValue('No auth data found');
     } catch (error) {
       return rejectWithValue('Failed to check auth status');
+    }
+  }
+);
+
+// Create async thunk for login
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (loginData, { rejectWithValue }) => {
+    try {
+      const apiUrl = `${env.apiUrl}/auth/login`;
+      const response = await api.post(apiUrl, loginData);
+
+      // Store token and user data on successful login
+      if (response.data.token) {
+        await storage.setToken(response.data.token);
+      }
+      if (response.data.user) {
+        await storage.setUser(response.data.user);
+      }
+
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        return rejectWithValue(error.response.data.message || 'Login failed');
+      } else if (error.request) {
+        return rejectWithValue('No response from server. Please check your connection.');
+      } else {
+        return rejectWithValue(error.message || 'An error occurred during login');
+      }
     }
   }
 );
@@ -168,6 +198,23 @@ const authSlice = createSlice({
       .addCase(checkAuth.rejected, (state) => {
         state.isAuthenticated = false;
         state.isVerified = false;
+      })
+      // Login reducers
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
       });
   },
 });
